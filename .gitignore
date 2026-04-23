@@ -1,0 +1,6 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Local user configuration. Publish config.example.json instead.
+config.json

@@ -1,0 +1,10 @@
+{
+  "vault_path": "",
+  "template_path": "",
+  "worklog_folder": "",
+  "timezone": "local",
+  "language": "auto",
+  "base_tags": [
+    "codex/worklog"
+  ]
+}
