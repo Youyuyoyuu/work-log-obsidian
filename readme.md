@@ -33,7 +33,6 @@ worklog/
     └── worklog_io.py
 ```
 
-If you are testing a packaging copy on a machine that already has another skill named `worklog`, validate this copy by directory path instead of invoking `$worklog`.
 
 ## Configure
 
@@ -217,7 +216,6 @@ worklog/
     └── worklog_io.py
 ```
 
-如果你正在测试一个打包副本，并且本机已经有另一个名为 `worklog` 的 skill，请用目录路径验证这个副本，不要直接通过 `$worklog` 触发。
 
 ## 配置
 
