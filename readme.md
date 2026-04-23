@@ -6,11 +6,13 @@ It is designed for users who keep project notes in Obsidian and want a repeatabl
 
 ## Install
 
-Install globally for `.agents` with `npx skills add`:
+### Option 1: Install to `.agents` with npx
 
 ```bash
-npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog --agent codex -g -y --copy
+npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog
 ```
+
+### Option 2: Manual install
 
 Place this skill folder in your Codex skills directory:
 
@@ -188,11 +190,13 @@ If this folder is named `worklog-generic` while its `SKILL.md` still says `name:
 
 ## 安装
 
-用 `npx skills add` 全局安装到 `.agents`：
+### 方法 1：用 npx 安装到 `.agents`
 
 ```bash
-npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog --agent codex -g -y --copy
+npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog
 ```
+
+### 方法 2：手动安装
 
 把这个 skill 文件夹放到你的 Codex skills 目录：
 
