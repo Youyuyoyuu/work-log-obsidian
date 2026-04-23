@@ -33,7 +33,6 @@ worklog/
     └── worklog_io.py
 ```
 
-
 ## Configure
 
 Copy the example config and fill in your own Obsidian paths:
@@ -157,20 +156,6 @@ Check the resolved config:
 python scripts/worklog_io.py status
 ```
 
-Validate the skill package by path:
-
-```bash
-python /path/to/skill-creator/scripts/quick_validate.py /path/to/worklog
-```
-
-Check that no local packaging files were included:
-
-```bash
-find /path/to/worklog -name ".DS_Store" -print
-```
-
-If this folder is named `worklog-generic` while its `SKILL.md` still says `name: worklog`, do not test it by typing `$worklog` on a machine that also has another `worklog` skill installed. Run `quick_validate.py` and `scripts/worklog_io.py` with explicit paths instead.
-
 ## Troubleshooting
 
 - `Config not found`: copy `config.example.json` to `config.json` and fill in the required fields.
@@ -215,7 +200,6 @@ worklog/
 └── scripts/
     └── worklog_io.py
 ```
-
 
 ## 配置
 
@@ -339,20 +323,6 @@ Codex 应读取所有返回的日志，并总结：
 ```bash
 python scripts/worklog_io.py status
 ```
-
-按路径验证 skill 包：
-
-```bash
-python /path/to/skill-creator/scripts/quick_validate.py /path/to/worklog
-```
-
-检查是否误包含本机打包文件：
-
-```bash
-find /path/to/worklog -name ".DS_Store" -print
-```
-
-如果这个文件夹名是 `worklog-generic`，但 `SKILL.md` 里仍写着 `name: worklog`，并且本机也安装了另一个 `worklog` skill，请不要通过输入 `$worklog` 来测试它。应该用明确路径运行 `quick_validate.py` 和 `scripts/worklog_io.py`。
 
 ## 常见问题
 
