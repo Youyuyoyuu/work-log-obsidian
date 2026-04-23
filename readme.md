@@ -6,6 +6,12 @@ It is designed for users who keep project notes in Obsidian and want a repeatabl
 
 ## Install
 
+Install globally for `.agents` with `npx skills add`:
+
+```bash
+npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog --agent codex -g -y --copy
+```
+
 Place this skill folder in your Codex skills directory:
 
 ```bash
@@ -114,6 +120,8 @@ Notes:
 - Task tags can be passed with or without a leading `#`.
 - Spaces in task tags are normalized to `_`.
 - The script writes exactly one task tag to frontmatter.
+- `Project` is the parent project; `tags` is the current task or work-content label.
+- If a task tag already exists in prior logs, the script reuses that tag's existing `Project`; otherwise it uses `--project-name`.
 - Same-day logs for the same project and task tag are appended to the existing note.
 - Different same-day project/task combinations are numbered as `MM.DD.md`, `MM.DD-1.md`, `MM.DD-2.md`, and so on.
 
@@ -179,6 +187,12 @@ If this folder is named `worklog-generic` while its `SKILL.md` still says `name:
 它适合使用 Obsidian 管理项目笔记的用户，用来稳定记录决策、完成事项、命令、阻塞点和下一步。
 
 ## 安装
+
+用 `npx skills add` 全局安装到 `.agents`：
+
+```bash
+npx skills add git@github.com:Youyuyoyuu/workflow-obsidian.git --skill worklog --agent codex -g -y --copy
+```
 
 把这个 skill 文件夹放到你的 Codex skills 目录：
 
@@ -288,6 +302,8 @@ python scripts/worklog_io.py write \
 - 任务 tag 可以带 `#`，也可以不带。
 - 任务 tag 中的空格会被转换为 `_`。
 - 脚本只会向 frontmatter 写入一个任务 tag。
+- `Project` 是父项目；`tags` 是当前任务或工作内容标签。
+- 如果某个任务 tag 已经出现在历史日志中，脚本会复用该 tag 既有的 `Project`；否则使用 `--project-name`。
 - 同一天、同项目、同任务 tag 的日志会追加到已有笔记。
 - 同一天的不同项目或任务组合会按 `MM.DD.md`、`MM.DD-1.md`、`MM.DD-2.md` 等方式编号。
 
