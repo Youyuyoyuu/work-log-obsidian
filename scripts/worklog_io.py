@@ -384,10 +384,6 @@ def render_template(
     return f"{rendered}\n\n{block}\n"
 
 
-def append_update(existing: str, block: str) -> str:
-    return existing.rstrip() + "\n\n" + block + "\n"
-
-
 def list_daily_files(worklog_dir: Path, prefix: str) -> list[DailyFile]:
     pattern = re.compile(DAILY_RE_TEMPLATE.format(prefix=re.escape(prefix)))
     files: list[DailyFile] = []
@@ -514,13 +510,14 @@ def cmd_write(args: argparse.Namespace) -> int:
 
     if existing:
         target = existing
-        output = apply_template_frontmatter(existing_text, template, date_str, project_name, tag, summary)
         if args.replace:
             output = rendered
             action = "replaced"
         else:
-            output = append_update(output, block)
-            action = "updated"
+            raise WorklogError(
+                "Existing same-day same-task note found. Merge the new work into the existing note body, "
+                "then rerun write with --replace to keep one consolidated worklog block."
+            )
     else:
         target, renames = next_target(config.worklog_dir, prefix, files)
         output = rendered
@@ -660,7 +657,7 @@ def build_parser() -> argparse.ArgumentParser:
     write.add_argument("--body-stdin", action="store_true", help="Read the summarized work log body from stdin")
     write.add_argument("--date", help="Override date as YYYY-MM-DD")
     write.add_argument("--dry-run", action="store_true", help="Print the planned write without changing files")
-    write.add_argument("--replace", action="store_true", help="Replace an existing same-day same-task note")
+    write.add_argument("--replace", action="store_true", help="Replace an existing same-day same-task note with a merged body")
     write.set_defaults(func=cmd_write)
 
     find = subparsers.add_parser("find", parents=[config_parent], help="Find work logs by project name or task tag")

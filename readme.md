@@ -115,6 +115,17 @@ python scripts/worklog_io.py write \
   --body-file /tmp/worklog-body.md
 ```
 
+Replace an existing same-day same-task log after you have merged the old and new body:
+
+```bash
+python scripts/worklog_io.py write \
+  --project-name "Project Name" \
+  --task-tag task/tag \
+  --summary "Merged summary" \
+  --body-file /tmp/worklog-body.md \
+  --replace
+```
+
 Notes:
 
 - Task tags can be passed with or without a leading `#`.
@@ -122,7 +133,7 @@ Notes:
 - The script writes exactly one task tag to frontmatter.
 - `Project` is the parent project; `tags` is the current task or work-content label.
 - If a task tag already exists in prior logs, the script reuses that tag's existing `Project`; otherwise it uses `--project-name`.
-- Same-day logs for the same project and task tag are appended to the existing note.
+- Same-day updates for the same project and task tag must be merged into the existing note body and written with `--replace`, keeping one worklog block.
 - Different same-day project/task combinations are numbered as `MM.DD.md`, `MM.DD-1.md`, `MM.DD-2.md`, and so on.
 
 ## Restore Memory
@@ -283,6 +294,17 @@ python scripts/worklog_io.py write \
   --body-file /tmp/worklog-body.md
 ```
 
+合并旧正文和新内容后，替换同一天、同项目、同任务 tag 的已有日志：
+
+```bash
+python scripts/worklog_io.py write \
+  --project-name "Project Name" \
+  --task-tag task/tag \
+  --summary "Merged summary" \
+  --body-file /tmp/worklog-body.md \
+  --replace
+```
+
 注意：
 
 - 任务 tag 可以带 `#`，也可以不带。
@@ -290,7 +312,7 @@ python scripts/worklog_io.py write \
 - 脚本只会向 frontmatter 写入一个任务 tag。
 - `Project` 是父项目；`tags` 是当前任务或工作内容标签。
 - 如果某个任务 tag 已经出现在历史日志中，脚本会复用该 tag 既有的 `Project`；否则使用 `--project-name`。
-- 同一天、同项目、同任务 tag 的日志会追加到已有笔记。
+- 同一天、同项目、同任务 tag 的更新必须先合并到已有正文，再用 `--replace` 写回，保持一个 worklog block。
 - 同一天的不同项目或任务组合会按 `MM.DD.md`、`MM.DD-1.md`、`MM.DD-2.md` 等方式编号。
 
 ## 恢复记忆

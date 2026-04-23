@@ -28,6 +28,7 @@ Use `scripts/worklog_io.py` for deterministic file operations:
 python scripts/worklog_io.py status
 python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Short summary" --body-file /tmp/worklog-body.md --dry-run
 python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Short summary" --body-file /tmp/worklog-body.md
+python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Merged summary" --body-file /tmp/worklog-body.md --replace
 python scripts/worklog_io.py find --project-name "Project Name" --format markdown
 python scripts/worklog_io.py find --task-tag task/tag --format markdown
 ```
@@ -45,7 +46,7 @@ Default scope is only the current Codex chat. Do not read Codex global history, 
    - Blockers
    - Next steps
 3. Write the body in the requested language. If no language is specified, follow the conversation language.
-4. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder.
+4. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
 5. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}`, `{{worklog_content}}`, or `{{codex_worklog}}`, the body is inserted there; otherwise it is appended.
 6. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
    - `Date`: the work log date.
@@ -58,7 +59,7 @@ File naming is managed by the script:
 - First log on a day: `MM.DD.md`.
 - Second different project or task on the same day: rename `MM.DD.md` to `MM.DD-1.md`, then create `MM.DD-2.md`.
 - Third and later different projects or tasks on the same day: create `MM.DD-3.md`, `MM.DD-4.md`, and so on.
-- Same project and same task tag on the same day: append an update block to that task's existing file instead of creating a new numbered file.
+- Same project and same task tag on the same day: merge the new work into that task's existing file and write it back with `--replace`, keeping one consolidated worklog block.
 - Same project but different task tag on the same day: create a separate numbered file.
 
 The metadata hierarchy is `Project` -> `tags`: `Project` is the parent project, and the single `tags` value is the current thread task/work content. When writing, prefer existing metadata found for that task tag; if none exists, use the provided project name and task tag.
