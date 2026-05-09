@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from datetime import datetime
@@ -46,6 +47,12 @@ class Config:
 class DailyFile:
     path: Path
     seq: int
+
+
+@dataclass(frozen=True)
+class AttachmentSpec:
+    source: Path
+    requested_name: str | None
 
 
 def normalize_tag(raw: str) -> str:
@@ -458,6 +465,70 @@ def relative_to_vault(path: Path, vault: Path | None) -> str:
         return str(path)
 
 
+def attachments_dir(worklog_dir: Path) -> Path:
+    return worklog_dir / "attachments"
+
+
+def attachment_embed_path(filename: str) -> str:
+    return (Path("attachments") / filename).as_posix()
+
+
+def normalized_attachment_name(raw: str) -> str:
+    name = str(raw).strip()
+    if not name:
+        raise WorklogError("Attachment name cannot be empty.")
+    if Path(name).name != name or "/" in name or "\\" in name:
+        raise WorklogError(f"Invalid attachment name '{raw}': use a filename only, not a path.")
+    if name in (".", ".."):
+        raise WorklogError(f"Invalid attachment name '{raw}'.")
+    return name
+
+
+def load_attachment_specs(args: argparse.Namespace) -> list[AttachmentSpec]:
+    if not args.manifest_stdin:
+        raise WorklogError("Provide --manifest-stdin.")
+    raw = sys.stdin.read().strip()
+    if not raw:
+        raise WorklogError("Attachment manifest is empty.")
+    try:
+        data = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise WorklogError(f"Invalid attachment manifest JSON: {exc.msg}") from exc
+    if not isinstance(data, list):
+        raise WorklogError("Attachment manifest must be a JSON array.")
+
+    specs: list[AttachmentSpec] = []
+    for index, item in enumerate(data, start=1):
+        if not isinstance(item, dict):
+            raise WorklogError(f"Attachment manifest item {index} must be an object.")
+        source_raw = str(item.get("source", "")).strip()
+        if not source_raw:
+            raise WorklogError(f"Attachment manifest item {index} is missing 'source'.")
+        source = Path(source_raw).expanduser().resolve()
+        if not source.exists():
+            raise WorklogError(f"Attachment source does not exist: {source}")
+        if not source.is_file():
+            raise WorklogError(f"Attachment source is not a file: {source}")
+        requested_name = item.get("name")
+        if requested_name is not None:
+            requested_name = normalized_attachment_name(requested_name)
+        specs.append(AttachmentSpec(source=source, requested_name=requested_name))
+    return specs
+
+
+def next_attachment_target(directory: Path, filename: str, reserved: set[str]) -> Path:
+    parsed = Path(filename)
+    stem = parsed.stem or parsed.name
+    suffix = parsed.suffix
+    candidate_name = filename
+    index = 0
+    while (directory / candidate_name).exists() or candidate_name in reserved:
+        index += 1
+        candidate_name = f"{stem}-{index}{suffix}"
+    reserved.add(candidate_name)
+    return directory / candidate_name
+
+
 def cmd_status(args: argparse.Namespace) -> int:
     config = load_config(args.config, require_template=True)
     payload = {
@@ -471,6 +542,45 @@ def cmd_status(args: argparse.Namespace) -> int:
         "language": config.language,
         "base_tags": list(config.base_tags),
     }
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
+    return 0
+
+
+def cmd_stage_attachments(args: argparse.Namespace) -> int:
+    config = load_config(args.config, require_template=False)
+    require_complete(config, need_template=False)
+    assert config.worklog_dir is not None
+
+    specs = load_attachment_specs(args)
+    target_dir = attachments_dir(config.worklog_dir)
+    reserved_names: set[str] = set()
+    attachments = []
+
+    for spec in specs:
+        filename = spec.requested_name or spec.source.name
+        filename = normalized_attachment_name(filename)
+        target = next_attachment_target(target_dir, filename, reserved_names)
+        attachments.append(
+            {
+                "source": str(spec.source),
+                "copied_to": str(target),
+                "embed_path": attachment_embed_path(target.name),
+            }
+        )
+
+    payload = {
+        "dry_run": args.dry_run,
+        "attachments_dir": str(target_dir),
+        "attachments": attachments,
+    }
+
+    if args.dry_run:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return 0
+
+    target_dir.mkdir(parents=True, exist_ok=True)
+    for item in attachments:
+        shutil.copy2(item["source"], item["copied_to"])
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 
@@ -640,6 +750,11 @@ def build_parser() -> argparse.ArgumentParser:
     status = subparsers.add_parser("status", parents=[config_parent], help="Show resolved configuration")
     status.set_defaults(func=cmd_status)
 
+    stage = subparsers.add_parser("stage-attachments", parents=[config_parent], help="Copy local images into the worklog attachments directory")
+    stage.add_argument("--manifest-stdin", action="store_true", help="Read a JSON attachment manifest array from stdin")
+    stage.add_argument("--dry-run", action="store_true", help="Print the planned attachment copies without changing files")
+    stage.set_defaults(func=cmd_stage_attachments)
+
     write = subparsers.add_parser("write", parents=[config_parent], help="Create or update a work log")
     write.add_argument(
         "--task-tag",
@@ -651,7 +766,7 @@ def build_parser() -> argparse.ArgumentParser:
     write.add_argument("--project-name", help="Project name to write into the template Project property")
     write.add_argument(
         "--summary",
-        help="One-line Summary property matching the requested or configured language. If it includes multiple sub-items, separate them as ① ...；② ...；③ ....",
+        help="One-line Summary property matching the requested or configured language. Use one numbered segment per subtask, such as ① ...；② ...；③ ..., and do not include next steps.",
     )
     write.add_argument("--body-file", help="Markdown file containing the summarized work log body")
     write.add_argument("--body-stdin", action="store_true", help="Read the summarized work log body from stdin")

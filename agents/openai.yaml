@@ -1,4 +1,4 @@
 interface:
   display_name: "Worklog"
-  short_description: "Obsidian work logs from Codex chats"
-  default_prompt: "Use $worklog to generate an Obsidian work log for this project and task."
+  short_description: "Obsidian work logs from Codex chats, including research notes and local figure attachments"
+  default_prompt: "Use $worklog to generate an Obsidian work log for this project or task, including key results, parameter settings, and local figure attachments when relevant."
