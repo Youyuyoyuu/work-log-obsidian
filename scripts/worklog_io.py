@@ -651,7 +651,7 @@ def build_parser() -> argparse.ArgumentParser:
     write.add_argument("--project-name", help="Project name to write into the template Project property")
     write.add_argument(
         "--summary",
-        help="One-line Summary property matching the requested or configured language.",
+        help="One-line Summary property matching the requested or configured language. If it includes multiple sub-items, separate them as ① ...；② ...；③ ....",
     )
     write.add_argument("--body-file", help="Markdown file containing the summarized work log body")
     write.add_argument("--body-stdin", action="store_true", help="Read the summarized work log body from stdin")

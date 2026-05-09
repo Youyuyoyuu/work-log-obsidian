@@ -26,9 +26,9 @@ Use `scripts/worklog_io.py` for deterministic file operations:
 
 ```bash
 python scripts/worklog_io.py status
-python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Short summary" --body-file /tmp/worklog-body.md --dry-run
-python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Short summary" --body-file /tmp/worklog-body.md
-python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "Merged summary" --body-file /tmp/worklog-body.md --replace
+python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "① First subtask；② Second subtask" --body-file /tmp/worklog-body.md --dry-run
+python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "① First subtask；② Second subtask" --body-file /tmp/worklog-body.md
+python scripts/worklog_io.py write --project-name "Project Name" --task-tag task/tag --summary "① Merged item one；② Merged item two" --body-file /tmp/worklog-body.md --replace
 python scripts/worklog_io.py find --project-name "Project Name" --format markdown
 python scripts/worklog_io.py find --task-tag task/tag --format markdown
 ```
@@ -53,6 +53,7 @@ Default scope is only the current Codex chat. Do not read Codex global history, 
    - `Project`: the project name. If the task tag already exists in prior logs, reuse that existing `Project`; otherwise use the provided project name.
    - `tags`: exactly one task tag. This is the thread task or work-content label under the project, not the project itself.
    - `Summary`: a concise one-line summary in the requested or configured language.
+   - If `Summary` includes multiple sub-items, keep them on the same line and separate them as `① ...；② ...；③ ...`.
 
 File naming is managed by the script:
 
