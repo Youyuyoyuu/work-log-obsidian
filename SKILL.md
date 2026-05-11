@@ -46,26 +46,20 @@ Default scope is only the current Codex chat. Do not read Codex global history, 
    - Attention
    - Next steps
 3. Write the body in the requested language. If no language is specified, follow the conversation language.
-4. If a matching language-polish skill is available, prefer doing one final prose pass before writing:
-   - For Chinese logs, prefer `humanizer-zh`.
-   - For English logs, prefer `humanizer`.
-   - If the relevant skill is unavailable, do not block the worklog. Write the log directly.
-   - Preserve the section headings, bullet structure, figure embeds, commands, parameter names, numeric values, and other technical content.
-   - Keep `Summary` on one line and preserve the required `① ...；② ...；③ ...` numbering if you polish it at all. Prefer to polish the body first.
-5. Write `Key results` as result bullets, not operation logs:
+4. Write `Key results` as result bullets, not operation logs:
    - Each top-level bullet is one result or one meaningful research subtask.
    - Keep interpretation and discussion merged into that result bullet.
    - Do not create a separate `Result interpretation` or `Current interpretation` section.
    - If a result has a key figure, stage the existing local image into `attachments/` and embed it under the corresponding result bullet.
    - Keep figure notes short: say what the figure is, and keep the conclusion in the result bullet.
-6. If figures are needed, stage them first with `stage-attachments`:
+5. If figures are needed, stage them first with `stage-attachments`:
    - The manifest must be passed through stdin as a JSON array.
    - Do not create persistent manifest files in the vault or skill folder.
    - The command copies images into `<worklog_folder>/attachments/` and returns `embed_path` values such as `attachments/result-comparison.png`.
    - Embed figures with Obsidian syntax such as `![[attachments/result-comparison.png]]`.
-7. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
-8. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}`, `{{worklog_content}}`, or `{{codex_worklog}}`, the body is inserted there; otherwise it is appended.
-9. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
+6. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
+7. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}`, `{{worklog_content}}`, or `{{codex_worklog}}`, the body is inserted there; otherwise it is appended.
+8. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
    - `Date`: the work log date.
    - `Project`: the project name. If the task tag already exists in prior logs, reuse that existing `Project`; otherwise use the provided project name.
    - `tags`: exactly one task tag. This is the thread task or work-content label under the project, not the project itself.
@@ -136,4 +130,3 @@ Keep the restored memory factual. If logs conflict, mention the conflict and pre
 - Do not execute Templater or other Obsidian plugin code embedded in templates.
 - Use wikilinks only for actual vault notes and local figure embeds; use normal Markdown links for external URLs.
 - When staging figures, copy them into `attachments/` through `stage-attachments`; do not leave persistent manifest files behind.
-- Optional language-polish passes must preserve the factual meaning of the log. They should smooth prose, not rewrite results or parameter details.

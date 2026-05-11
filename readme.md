@@ -133,22 +133,6 @@ Notes:
 - Keep figure explanations short. Say what the figure is, and keep the interpretation in the result bullet itself.
 - If there is no meaningful caution for the current log, `Attention` can be omitted.
 
-## Preferred language polish
-
-If you also have a prose-polish skill installed, `worklog` should prefer using it before writing the final note:
-
-- Chinese logs should prefer `humanizer-zh`.
-- English logs should prefer `humanizer`.
-- If the matching skill is unavailable, the worklog still writes normally.
-
-When used, the polish pass should preserve:
-
-- the section headings
-- the bullet structure
-- figure embeds such as `![[attachments/result-comparison.png]]`
-- commands, parameter names, and numeric values
-- the one-line `Summary` format and its `① ...；② ...；③ ...` numbering
-
 ## Stage Figures
 
 If you already have local figures, copy them into the worklog `attachments/` directory before writing the note:
@@ -408,22 +392,6 @@ Summary:
 - `核心结果` 应该写成结果，而不是操作流水账。
 - 图件说明尽量简短，只说明“这张图是什么”；结论放在结果主条目里。
 - 如果当前日志没有明确的注意项，可以省略 `注意` 这一节。
-
-## 优先润色
-
-如果你另外安装了文字润色类 skill，`worklog` 应优先在最终写入前调用：
-
-- 中文日志应优先用 `humanizer-zh`
-- 英文日志应优先用 `humanizer`
-- 如果没有对应 skill，`worklog` 仍然直接正常写入
-
-如果启用润色，应保留以下内容不被改写坏：
-
-- 各级标题结构
-- 列表层级
-- 图件嵌入，例如 `![[attachments/result-comparison.png]]`
-- 命令、参数名、数值
-- frontmatter 中单行 `Summary` 的格式，以及 `① ...；② ...；③ ...` 编号方式
 
 ## 复制图件
 
