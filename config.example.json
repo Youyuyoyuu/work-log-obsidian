@@ -5,6 +5,6 @@
   "timezone": "local",
   "language": "auto",
   "base_tags": [
-    "codex/worklog"
+    "research/worklog"
   ]
 }

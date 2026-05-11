@@ -24,7 +24,7 @@ DEFAULT_CONFIG_EXAMPLE = Path(__file__).resolve().parents[1] / "config.example.j
 DATE_RE = re.compile(r"^\s*(\d{4}-\d{2}-\d{2})\s*$")
 DAILY_RE_TEMPLATE = r"^{prefix}(?:-(?P<seq>\d+))?\.md$"
 INLINE_TAG_RE = re.compile(r"(?<![\w/-])#([^\s#\[\]\|,;:'\"<>]+)")
-PLACEHOLDERS = ("{{WORKLOG_CONTENT}}", "{{worklog_content}}", "{{codex_worklog}}")
+PLACEHOLDERS = ("{{WORKLOG_CONTENT}}", "{{worklog_content}}")
 
 
 class WorklogError(Exception):
@@ -96,7 +96,7 @@ def load_config(path: Path, require_template: bool = True) -> Config:
     template = (vault / template_raw).resolve() if vault and template_raw else None
     worklog_dir = (vault / folder_raw).resolve() if vault and folder_raw else None
 
-    tags = tuple(normalize_tag(tag) for tag in data.get("base_tags", ["codex/worklog"]))
+    tags = tuple(normalize_tag(tag) for tag in data.get("base_tags", ["research/worklog"]))
     timezone = str(data.get("timezone", "local")).strip() or "local"
     language = str(data.get("language", "auto")).strip() or "auto"
 

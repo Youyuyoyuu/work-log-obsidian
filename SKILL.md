@@ -1,11 +1,11 @@
 ---
 name: worklog
-description: Generate current-chat Codex work logs in an Obsidian vault using a configured daily template, stage local figures into an attachments folder, and restore project or task memory using Project plus a single task tag.
+description: Generate current-chat work logs in an Obsidian vault using a configured daily template, stage local figures into an attachments folder, and restore project or task memory using Project plus a single task tag.
 ---
 
 # Worklog
 
-Use this skill when the user wants to create an Obsidian work log from the current Codex chat, stage existing local figures for that note, or recover project/task context from prior work logs.
+Use this skill when the user wants to create an Obsidian work log from the current chat, stage existing local figures for that note, or recover project/task context from prior work logs.
 
 ## Configuration
 
@@ -36,7 +36,7 @@ python scripts/worklog_io.py find --task-tag task/tag --format markdown
 
 ## Generate A Work Log
 
-Default scope is only the current Codex chat. Do not read Codex global history, session databases, or other threads unless the user explicitly asks.
+Default scope is only the current chat. Do not read global history, session databases, or other threads unless the user explicitly asks.
 
 1. Get the project name and one task tag from the user or the current request. Use a legal Obsidian tag without leading `#`; spaces are normalized to `_`.
 2. Summarize the current chat into a concise Markdown body. Prefer these sections unless the user gives another template:
@@ -58,7 +58,7 @@ Default scope is only the current Codex chat. Do not read Codex global history, 
    - The command copies images into `<worklog_folder>/attachments/` and returns `embed_path` values such as `attachments/result-comparison.png`.
    - Embed figures with Obsidian syntax such as `![[attachments/result-comparison.png]]`.
 6. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
-7. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}`, `{{worklog_content}}`, or `{{codex_worklog}}`, the body is inserted there; otherwise it is appended.
+7. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}` or `{{worklog_content}}`, the body is inserted there; otherwise it is appended.
 8. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
    - `Date`: the work log date.
    - `Project`: the project name. If the task tag already exists in prior logs, reuse that existing `Project`; otherwise use the provided project name.
