@@ -18,7 +18,7 @@ Required fields:
 - `worklog_folder`: destination folder for work logs, relative to the vault root.
 - `timezone`: IANA time zone such as `America/New_York`, or `local` to use the system time zone.
 - `language`: `auto` by default. Write log bodies and Summary values in the language requested by the user; if unspecified, follow the current conversation language.
-- `base_tags`: legacy fallback only. Work logs must still contain exactly one task tag.
+- `base_tags`: default base tags for the skill config. Each generated work log must still contain exactly one explicit task tag for the current task.
 
 If `vault_path`, `template_path`, or `worklog_folder` is empty, ask the user for those paths before writing. Do not guess.
 
@@ -46,20 +46,24 @@ Default scope is only the current chat. Do not read global history, session data
    - Attention
    - Next steps
 3. Write the body in the requested language. If no language is specified, follow the conversation language.
-4. Write `Key results` as result bullets, not operation logs:
+4. Exclude process-only maintenance unless it is explicitly part of the current `Project`:
+   - Do not log Git activity such as commits, pushes, branch changes, repository setup, or README-only publishing work when those actions are merely skill/project maintenance.
+   - Do not log `AGENTS.md` updates, local agent configuration, environment setup, or assistant workflow changes unless the user explicitly says they belong to the current `Project`.
+   - If a maintenance action directly affects the research or project being logged, record only the project-relevant effect, not the mechanics of the Git or agent update.
+5. Write `Key results` as result bullets, not operation logs:
    - Each top-level bullet is one result or one meaningful research subtask.
    - Keep interpretation and discussion merged into that result bullet.
    - Do not create a separate `Result interpretation` or `Current interpretation` section.
    - If a result has a key figure, stage the existing local image into `attachments/` and embed it under the corresponding result bullet.
    - Keep figure notes short: say what the figure is, and keep the conclusion in the result bullet.
-5. If figures are needed, stage them first with `stage-attachments`:
+6. If figures are needed, stage them first with `stage-attachments`:
    - The manifest must be passed through stdin as a JSON array.
    - Do not create persistent manifest files in the vault or skill folder.
    - The command copies images into `<worklog_folder>/attachments/` and returns `embed_path` values such as `attachments/result-comparison.png`.
    - Embed figures with Obsidian syntax such as `![[attachments/result-comparison.png]]`.
-6. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
-7. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}` or `{{worklog_content}}`, the body is inserted there; otherwise it is appended.
-8. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
+7. Run the script with `write`. Start with `--dry-run` when using a new vault, template, or folder. If the script reports an existing same-day same-task note, read that note, merge the new work into one consolidated body, and rerun `write` with `--replace`.
+8. The script inserts the body into the configured template. If the template contains `{{WORKLOG_CONTENT}}` or `{{worklog_content}}`, the body is inserted there; otherwise it is appended.
+9. Frontmatter properties must exactly match the configured template's property names and order. The script fills only properties already present in the template:
    - `Date`: the work log date.
    - `Project`: the project name. If the task tag already exists in prior logs, reuse that existing `Project`; otherwise use the provided project name.
    - `tags`: exactly one task tag. This is the thread task or work-content label under the project, not the project itself.

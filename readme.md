@@ -22,7 +22,7 @@ Place this skill folder in your skill directory.
 
 Examples:
 
-```bash
+```text
 ~/.agents/skills/worklog
 ~/.codex/skills/worklog
 ```
@@ -42,11 +42,7 @@ worklog/
 
 ## Configure
 
-Copy the example config and fill in your own Obsidian paths:
-
-```bash
-cp config.example.json config.json
-```
+Create `config.json` from `config.example.json`, then fill in your own Obsidian paths.
 
 Example:
 
@@ -70,7 +66,7 @@ Fields:
 - `worklog_folder`: destination folder for generated work logs, relative to the vault root.
 - `timezone`: `local` for the system time zone, or an IANA time zone such as `America/New_York`.
 - `language`: `auto` follows the user request or current conversation language.
-- `base_tags`: legacy fallback only; generated logs still use exactly one task tag.
+- `base_tags`: default base tags for the skill config. Each generated log still writes the single task tag provided for that log.
 
 ## Obsidian Template
 
@@ -138,65 +134,33 @@ Notes:
 - `Key results` should read as results, not a list of operations.
 - Keep figure explanations short. Say what the figure is, and keep the interpretation in the result bullet itself.
 - If there is no meaningful caution for the current log, `Attention` can be omitted.
+- Exclude process-only maintenance such as Git commits, pushes, branch changes, repository setup, `AGENTS.md` updates, local agent configuration, and assistant workflow changes unless they are explicitly part of the current `Project`.
+- If a maintenance action directly affects the research or project being logged, record only the project-relevant effect, not the mechanics of the Git or agent update.
 
 ## Stage Figures
 
-If you already have local figures, copy them into the worklog `attachments/` directory before writing the note:
-
-```bash
-printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin --dry-run
-```
-
-Run the real copy:
-
-```bash
-printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin
-```
+When the current chat includes local figure paths, the skill can decide which figures are useful for the log and stage only the relevant ones.
 
 Behavior:
 
 - The manifest is passed through `stdin`; you do not need a JSON file on disk.
 - Images are copied into `<worklog_folder>/attachments/`.
-- The command returns JSON with `embed_path` values such as `attachments/result-comparison.png`.
+- Staged figures provide `embed_path` values such as `attachments/result-comparison.png`.
 - Use those values directly in the note body with `![[attachments/result-comparison.png]]`.
+
+If you already have local figures and want to manage them yourself, you can also place them directly in the worklog `attachments/` directory and embed them with the same `![[attachments/<filename>]]` syntax.
 
 ## Generate A Log
 
 Use `$worklog`, then provide a project name and one task tag. The skill summarizes only the current chat unless you explicitly ask it to use more context.
 
-Manual dry run:
+Example:
 
-```bash
-python scripts/worklog_io.py write \
-  --project-name "Project Name" \
-  --task-tag task/tag \
-  --summary "① Complete one parameter test and confirm the main trend；② Organize the key figure and mark one part for review" \
-  --body-file /tmp/worklog-body.md \
-  --dry-run
-```
+- `$worklog Generate today's log. Project name: Project Name. Use tag task/tag.`
 
-Write the log:
+Different same-day project/task combinations are numbered as `MM.DD.md`, `MM.DD-1.md`, `MM.DD-2.md`, and so on.
 
-```bash
-python scripts/worklog_io.py write \
-  --project-name "Project Name" \
-  --task-tag task/tag \
-  --summary "① Complete one parameter test and confirm the main trend；② Organize the key figure and mark one part for review" \
-  --body-file /tmp/worklog-body.md
-```
-
-Replace an existing same-day same-task log after you have merged the old and new body:
-
-```bash
-python scripts/worklog_io.py write \
-  --project-name "Project Name" \
-  --task-tag task/tag \
-  --summary "① Merge the updated result note；② Refresh the figure reference after review" \
-  --body-file /tmp/worklog-body.md \
-  --replace
-```
-
-Notes:
+### Tag Rules
 
 - Task tags can be passed with or without a leading `#`.
 - Spaces in task tags are normalized to `_`.
@@ -204,9 +168,8 @@ Notes:
 - `Project` is the parent project; `tags` is the current task or work-content label.
 - If a task tag already exists in prior logs, the script reuses that tag's existing `Project`; otherwise it uses `--project-name`.
 - Same-day updates for the same project and task tag must be merged into the existing note body and written with `--replace`, keeping one worklog block.
-- Different same-day project/task combinations are numbered as `MM.DD.md`, `MM.DD-1.md`, `MM.DD-2.md`, and so on.
 
-## Summary Rules
+### Summary Rules
 
 `Summary` stays in frontmatter and must stay on one line.
 
@@ -224,33 +187,23 @@ Suggested generic examples:
 
 ## Restore Memory
 
-Find all logs for a project:
+In a new chat, ask `worklog` to restore memory for a project name or task tag. For example:
 
-```bash
-python scripts/worklog_io.py find --project-name "Project Name" --format markdown
-```
+- `$worklog Restore memory for Project Name.`
+- `$worklog Restore memory for task tag task/tag.`
 
-Find all logs for one task tag:
+You can also restore memory from a specific log when you know the note path or filename:
 
-```bash
-python scripts/worklog_io.py find --task-tag task/tag --format markdown
-```
+- `$worklog Restore memory from MM.DD.md.`
+- `$worklog Restore memory from path/to/log.md.`
 
-Read every returned log and summarize:
+The restored memory should summarize:
 
 - current goal or active question
 - key results
 - parameter settings that still matter
 - attention points and risks
 - next steps
-
-## Validate
-
-Check the resolved config:
-
-```bash
-python scripts/worklog_io.py status
-```
 
 ## Troubleshooting
 
@@ -261,6 +214,78 @@ python scripts/worklog_io.py status
 - `Attachment manifest is empty` or `Invalid attachment manifest JSON`: pass a JSON array through `stdin`.
 - `Attachment source does not exist`: check that each source image path is correct.
 - No logs found in `find`: confirm that the requested `Project` value or task tag exists in the target worklog folder.
+
+## Extended Reading: Manual CLI Commands
+
+These commands are optional references for users who want to run the helper script directly.
+
+Create a local config:
+
+```bash
+cp config.example.json config.json
+```
+
+Stage figures with a dry run:
+
+```bash
+printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin --dry-run
+```
+
+Stage figures for real:
+
+```bash
+printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin
+```
+
+Write a log with a dry run:
+
+```bash
+python scripts/worklog_io.py write \
+  --project-name "Project Name" \
+  --task-tag task/tag \
+  --summary "① Complete one parameter test and confirm the main trend；② Organize the key figure and mark one part for review" \
+  --body-file /tmp/worklog-body.md \
+  --dry-run
+```
+
+Write a log:
+
+```bash
+python scripts/worklog_io.py write \
+  --project-name "Project Name" \
+  --task-tag task/tag \
+  --summary "① Complete one parameter test and confirm the main trend；② Organize the key figure and mark one part for review" \
+  --body-file /tmp/worklog-body.md
+```
+
+Replace an existing same-day same-task log after merging the old and new body:
+
+```bash
+python scripts/worklog_io.py write \
+  --project-name "Project Name" \
+  --task-tag task/tag \
+  --summary "① Merge the updated result note；② Refresh the figure reference after review" \
+  --body-file /tmp/worklog-body.md \
+  --replace
+```
+
+Find logs by project:
+
+```bash
+python scripts/worklog_io.py find --project-name "Project Name" --format markdown
+```
+
+Find logs by task tag:
+
+```bash
+python scripts/worklog_io.py find --task-tag task/tag --format markdown
+```
+
+Check resolved config:
+
+```bash
+python scripts/worklog_io.py status
+```
 
 ---
 
@@ -286,7 +311,7 @@ npx skills add git@github.com:Youyuyoyuu/work-log-obsidian.git --skill worklog
 
 示例路径：
 
-```bash
+```text
 ~/.agents/skills/worklog
 ~/.codex/skills/worklog
 ```
@@ -306,11 +331,7 @@ worklog/
 
 ## 配置
 
-复制示例配置，并填写你自己的 Obsidian 路径：
-
-```bash
-cp config.example.json config.json
-```
+从 `config.example.json` 创建 `config.json`，并填写你自己的 Obsidian 路径。
 
 示例：
 
@@ -334,7 +355,7 @@ cp config.example.json config.json
 - `worklog_folder`：生成工作日志的目标文件夹，相对于 vault 根目录。
 - `timezone`：使用 `local` 表示系统本地时区，也可以填写 IANA 时区，例如 `America/New_York`。
 - `language`：`auto` 表示跟随用户请求或当前对话语言。
-- `base_tags`：仅用于兼容旧逻辑；生成的日志仍然只写入一个任务 tag。
+- `base_tags`：skill 配置中的默认基础 tag。实际生成日志时，仍然写入该日志对应的唯一任务 tag。
 
 ## Obsidian 模板
 
@@ -402,33 +423,110 @@ Summary:
 - `核心结果` 应该写成结果，而不是操作流水账。
 - 图件说明尽量简短，只说明“这张图是什么”；结论放在结果主条目里。
 - 如果当前日志没有明确的注意项，可以省略 `注意` 这一节。
+- 排除只属于流程维护的内容，例如 Git commit、push、分支切换、仓库设置、`AGENTS.md` 更新、本地 agent 配置和助手工作流调整；除非它们被明确说明为当前 `Project` 的一部分。
+- 如果某个维护动作确实直接影响当前研究或项目，只记录和项目相关的影响，不记录 Git 或 agent 更新的操作细节。
 
 ## 复制图件
 
-如果你已经有本地图件，可以先把它们复制到 worklog 的 `attachments/` 目录，再写日志：
-
-```bash
-printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin --dry-run
-```
-
-正式复制：
-
-```bash
-printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin
-```
+如果当前聊天中包含本地图件路径，skill 可以自行判断哪些图件适合写入日志，并只复制相关图件。
 
 行为说明：
 
 - manifest 通过 `stdin` 传入，不需要在磁盘上生成 JSON 文件。
 - 图片会被复制到 `<worklog_folder>/attachments/`。
-- 命令会返回 JSON，其中包含 `attachments/result-comparison.png` 这样的 `embed_path`。
+- 复制后的图件会提供 `attachments/result-comparison.png` 这样的 `embed_path`。
 - 正文中直接使用 `![[attachments/result-comparison.png]]` 即可嵌入。
+
+如果你已经有本地图件，并希望自己管理，也可以手动把它们放到 worklog 的 `attachments/` 目录中，再用同样的 `![[attachments/<filename>]]` 语法嵌入。
 
 ## 生成日志
 
 使用 `$worklog`，并提供项目名和一个任务 tag。除非你明确要求使用更多上下文，否则 skill 只总结当前聊天。
 
-手动 dry run：
+示例：
+
+- `$worklog 生成今天的日志，项目名 Project Name，tag 用 task/tag。`
+
+同一天的不同项目或任务组合会按 `MM.DD.md`、`MM.DD-1.md`、`MM.DD-2.md` 等方式编号。
+
+### Tag 规则
+
+- 任务 tag 可以带 `#`，也可以不带。
+- 任务 tag 中的空格会被转换为 `_`。
+- 脚本只会向 frontmatter 写入一个任务 tag。
+- `Project` 是父项目；`tags` 是当前任务或工作内容标签。
+- 如果某个任务 tag 已经出现在历史日志中，脚本会复用该 tag 既有的 `Project`；否则使用 `--project-name`。
+- 同一天、同项目、同任务 tag 的更新必须先合并到已有正文，再用 `--replace` 写回，保持一个 worklog block。
+
+### Summary 规则
+
+`Summary` 写在 frontmatter 中，并且必须保持单行。
+
+规则：
+
+- 需要多个子事项时，使用 `① ...；② ...；③ ...`。
+- 每个编号只表示一个独立子任务。
+- 单个子任务内部可以把动作和结果合并写在一起。
+- `Summary` 不写下一步。
+
+推荐的泛化示例：
+
+- `① 完成一组参数测试并确认主要趋势；② 整理关键图件并标出一个待复核部分`
+- `① 跑通一轮数据处理并得到初步结果；② 对比参考输出后确认主体模式；③ 汇总当前不稳定参数`
+
+## 恢复记忆
+
+在新对话中，要求 `worklog` 按项目名或任务 tag 恢复记忆。例如：
+
+- `$worklog 恢复 Project Name 的项目记忆。`
+- `$worklog 恢复 task/tag 这个任务 tag 的记忆。`
+
+如果你知道具体日志路径或文件名，也可以指定某篇日志来恢复记忆：
+
+- `$worklog 从 MM.DD.md 恢复记忆。`
+- `$worklog 从 path/to/log.md 恢复记忆。`
+
+恢复出的记忆应总结：
+
+- 当前目标或活跃问题
+- 核心结果
+- 仍然重要的参数设置
+- 注意项和风险
+- 下一步
+
+## 常见问题
+
+- `Config not found`：把 `config.example.json` 复制为 `config.json`，并填写必需字段。
+- `Missing config field(s)`：填写 `vault_path`、`template_path` 和 `worklog_folder`。
+- `Template path does not exist`：确认 `template_path` 是相对于 vault 根目录的路径。
+- `Invalid tag`：移除标点、开头数字或空的嵌套 tag 片段。
+- `Attachment manifest is empty` 或 `Invalid attachment manifest JSON`：通过 `stdin` 传入 JSON 数组。
+- `Attachment source does not exist`：确认每个图片源路径都正确。
+- `find` 找不到日志：确认目标 worklog 文件夹中存在对应的 `Project` 值或任务 tag。
+
+## 扩展阅读：手动 CLI 命令
+
+这些命令是可选参考，适合需要直接运行辅助脚本的用户。
+
+创建本地配置：
+
+```bash
+cp config.example.json config.json
+```
+
+dry run 复制图件：
+
+```bash
+printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin --dry-run
+```
+
+正式复制图件：
+
+```bash
+printf '%s' '[{"source":"/absolute/path/to/figure-a.png"},{"source":"/absolute/path/to/figure-b.png","name":"result-comparison.png"}]' | python scripts/worklog_io.py stage-attachments --manifest-stdin
+```
+
+dry run 写日志：
 
 ```bash
 python scripts/worklog_io.py write \
@@ -439,7 +537,7 @@ python scripts/worklog_io.py write \
   --dry-run
 ```
 
-正式写入：
+正式写入日志：
 
 ```bash
 python scripts/worklog_io.py write \
@@ -460,68 +558,20 @@ python scripts/worklog_io.py write \
   --replace
 ```
 
-说明：
-
-- 任务 tag 可以带 `#`，也可以不带。
-- 任务 tag 中的空格会被转换为 `_`。
-- 脚本只会向 frontmatter 写入一个任务 tag。
-- `Project` 是父项目；`tags` 是当前任务或工作内容标签。
-- 如果某个任务 tag 已经出现在历史日志中，脚本会复用该 tag 既有的 `Project`；否则使用 `--project-name`。
-- 同一天、同项目、同任务 tag 的更新必须先合并到已有正文，再用 `--replace` 写回，保持一个 worklog block。
-- 同一天的不同项目或任务组合会按 `MM.DD.md`、`MM.DD-1.md`、`MM.DD-2.md` 等方式编号。
-
-## Summary 规则
-
-`Summary` 写在 frontmatter 中，并且必须保持单行。
-
-规则：
-
-- 需要多个子事项时，使用 `① ...；② ...；③ ...`。
-- 每个编号只表示一个独立子任务。
-- 单个子任务内部可以把动作和结果合并写在一起。
-- `Summary` 不写下一步。
-
-推荐的泛化示例：
-
-- `① 完成一组参数测试并确认主要趋势；② 整理关键图件并标出一个待复核部分`
-- `① 跑通一轮数据处理并得到初步结果；② 对比参考输出后确认主体模式；③ 汇总当前不稳定参数`
-
-## 恢复记忆
-
-查找某个项目的全部日志：
+按项目查找日志：
 
 ```bash
 python scripts/worklog_io.py find --project-name "Project Name" --format markdown
 ```
 
-查找某个任务 tag 的全部日志：
+按任务 tag 查找日志：
 
 ```bash
 python scripts/worklog_io.py find --task-tag task/tag --format markdown
 ```
-
-读取所有返回的日志，并总结：
-
-- 当前目标或活跃问题
-- 核心结果
-- 仍然重要的参数设置
-- 注意项和风险
-- 下一步
-
-## 验证
 
 检查解析后的配置：
 
 ```bash
 python scripts/worklog_io.py status
 ```
-
-## 常见问题
-
-- `Config not found`：把 `config.example.json` 复制为 `config.json`，并填写必需字段。
-- `Missing config field(s)`：填写 `vault_path`、`template_path` 和 `worklog_folder`。
-- `Template path does not exist`：确认 `template_path` 是相对于 vault 根目录的路径。
-- `Invalid tag`：移除标点、开头数字或空的嵌套 tag 片段。
-- `Attachment manifest is empty` 或 `Invalid attachment manifest JSON`：通过 `stdin` 传入 JSON 数组。
-- `Attachment source does not exist`：确认每个图片源路径都正确。
-- `find` 找不到日志：确认目标 worklog 文件夹中存在对应的 `Project` 值或任务 tag。
