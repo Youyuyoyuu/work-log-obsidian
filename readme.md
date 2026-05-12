@@ -13,7 +13,7 @@ It is designed as a general research-style logging workflow: summarize key resul
 ### Option 1: Install to `.agents` with npx
 
 ```bash
-npx skills add git@github.com:Youyuyoyuu/work-log-obsidian.git --skill worklog
+npx skills add https://github.com/Youyuyoyuu/work-log-obsidian --skill worklog
 ```
 
 ### Option 2: Manual install
@@ -302,7 +302,7 @@ python scripts/worklog_io.py status
 ### 方法 1：用 npx 安装到 `.agents`
 
 ```bash
-npx skills add git@github.com:Youyuyoyuu/work-log-obsidian.git --skill worklog
+npx skills add https://github.com/Youyuyoyuu/work-log-obsidian --skill worklog
 ```
 
 ### 方法 2：手动安装
